@@ -11,12 +11,23 @@ client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
 auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
 spotify = spotipy.Spotify(client_credentials_manager=auth_manager)
 
+def playlist_get_songs(playlist_id):
+    data=spotify.playlist_items(playlist_id)
+    songs=[]
+    for item in data['items']:
+        songs.append(item['track'])
+    return songs
 
-lz_uri = 'spotify:artist:36QJpDe2go2KgaRleHCDTp'  
+def extract_track(trackOBJ):
+    data={
+        "name":trackOBJ['name'],
+        "artists": [artist['name']for artist in trackOBJ['artists']]
+    }
+    return data
 
-results = spotify.artist_top_tracks(lz_uri)
-for track in results['tracks']:
-    print(f"Track: {track['name']} - Preview URL: {track['preview_url']}")
+    
+
+
 
 
 
