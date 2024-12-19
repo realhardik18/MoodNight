@@ -105,7 +105,7 @@ async function startContinuousRecording(receiver, userId, guildId) {
   };
 }
 
-client.on(Events.ClientReady, () => console.log("Ready!"));
+client.on(Events.ClientReady, () => console.log("ready hoon mai"));
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.content.toLowerCase() === "!join") {
