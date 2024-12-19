@@ -10,6 +10,7 @@ import {
 } from "@discordjs/voice";
 import fs from "fs";
 import prism from "prism-media";
+import { spawn } from "child_process";
 
 const client = new Client({
   intents: [
@@ -25,30 +26,77 @@ if (!fs.existsSync("./audio")) {
   fs.mkdirSync("./audio");
 }
 
-async function recordAudio(receiver, userId, guildId) {
-  const audioStream = receiver.subscribe(userId, {
-    end: { behavior: EndBehaviorType.AfterSilence, duration: 1000 },
-  });
+async function startContinuousRecording(receiver, userId, guildId) {
+  let isRecording = true;
 
-  const opusDecoder = new prism.opus.Decoder({
-    rate: 48000,
-    channels: 2,
-    frameSize: 960,
-  });
+  const recordChunk = async () => {
+    if (!isRecording) return;
 
-  const filePath = `./audio/${guildId}-${userId}-${Date.now()}.pcm`;
-  const writeStream = fs.createWriteStream(filePath);
+    const opusDecoder = new prism.opus.Decoder({
+      rate: 48000, // Sample rate in Hz
+      channels: 2, // Stereo audio
+      frameSize: 960,
+    });
 
-  console.log(`Recording audio to ${filePath}`);
-  audioStream.pipe(opusDecoder).pipe(writeStream);
+    const audioStream = receiver.subscribe(userId, {
+      end: { behavior: EndBehaviorType.AfterSilence, duration: 1000 },
+    });
 
-  // Close the stream after 10 seconds
-  setTimeout(() => {
-    audioStream.unpipe(opusDecoder);
-    opusDecoder.unpipe(writeStream);
-    writeStream.end();
-    console.log(`Saved audio file: ${filePath}`);
-  }, 10 * 1000);
+    const pcmFilePath = `./audio/${guildId}-${userId}-${Date.now()}.pcm`;
+    const wavFilePath = pcmFilePath.replace(".pcm", ".wav");
+    const writeStream = fs.createWriteStream(pcmFilePath);
+
+    console.log(`Recording audio to ${pcmFilePath}`);
+    audioStream.pipe(opusDecoder).pipe(writeStream);
+
+    // Stop recording after 10 seconds
+    setTimeout(() => {
+      audioStream.unpipe(opusDecoder);
+      opusDecoder.unpipe(writeStream);
+      writeStream.end();
+
+      console.log(`Saved PCM file: ${pcmFilePath}`);
+
+      // Convert PCM to WAV using ffmpeg with high-quality settings
+      const ffmpeg = spawn("ffmpeg", [
+        "-f", "s16le", // Input format: PCM 16-bit little-endian
+        "-ar", "48000", // Input sample rate (48 kHz)
+        "-ac", "2", // Input channels (stereo)
+        "-i", pcmFilePath, // Input file
+        "-vn", // No video
+        "-ar", "48000", // Output sample rate (48 kHz)
+        "-ac", "2", // Output channels (stereo)
+        "-b:a", "192k", // Audio bitrate (192 kbps)
+        wavFilePath, // Output file
+      ]);
+
+      ffmpeg.on("close", (code) => {
+        if (code === 0) {
+          console.log(`Converted to high-quality WAV: ${wavFilePath}`);
+          fs.unlinkSync(pcmFilePath); // Delete the PCM file
+        } else {
+          console.error(`ffmpeg process failed with code ${code}`);
+        }
+      });
+
+      // Start a new recording chunk
+      recordChunk();
+    }, 10 * 1000);
+
+    // Handle stream errors
+    audioStream.on("error", (error) => {
+      console.error("Audio stream error:", error);
+      isRecording = false;
+    });
+  };
+
+  // Start the first recording chunk
+  recordChunk();
+
+  return () => {
+    isRecording = false;
+    console.log("Stopped recording.");
+  };
 }
 
 client.on(Events.ClientReady, () => console.log("Ready!"));
@@ -74,7 +122,7 @@ client.on(Events.MessageCreate, async (message) => {
       // Start recording audio for each user in the channel
       channel.members.forEach((member) => {
         if (!member.user.bot) {
-          recordAudio(receiver, member.id, channel.guild.id);
+          startContinuousRecording(receiver, member.id, channel.guild.id);
         }
       });
     });
