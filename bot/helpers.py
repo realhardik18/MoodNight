@@ -25,8 +25,8 @@ def extract_track(trackOBJ):
     }
     return data
 
-    
-
+for song in playlist_get_songs('6GXnlqH82VNc1RCXZnDweq'):
+    print(extract_track(song))
 
 
 
