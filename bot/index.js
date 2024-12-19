@@ -20,7 +20,7 @@ const client = new Client({
     GatewayIntentBits.Guilds,
   ],
 });
-
+var file = 0;
 // Ensure the audio folder exists
 if (!fs.existsSync("./audio")) {
   fs.mkdirSync("./audio");
@@ -48,11 +48,11 @@ async function startContinuousRecording(receiver, userId, guildId) {
     });
 
     const timestamp = getCurrentTimestamp();
-    const pcmFilePath = ./audio/${timestamp}.pcm;
+    const pcmFilePath = `./audio/${timestamp}.pcm`;
     const wavFilePath = pcmFilePath.replace(".pcm", ".wav");
     const writeStream = fs.createWriteStream(pcmFilePath);
 
-    console.log(Recording audio to ${pcmFilePath});
+    console.log(`Recording audio to ${pcmFilePath}`);
     audioStream.pipe(opusDecoder).pipe(writeStream);
 
     // Stop recording after 30 seconds
@@ -61,7 +61,7 @@ async function startContinuousRecording(receiver, userId, guildId) {
       opusDecoder.unpipe(writeStream);
       writeStream.end();
 
-      console.log(Saved PCM file: ${pcmFilePath});
+      console.log(`Saved PCM file: ${pcmFilePath}`);
 
       // Convert PCM to WAV using ffmpeg with high-quality settings
       const ffmpeg = spawn("ffmpeg", [
@@ -78,10 +78,10 @@ async function startContinuousRecording(receiver, userId, guildId) {
 
       ffmpeg.on("close", (code) => {
         if (code === 0) {
-          console.log(Converted to high-quality WAV: ${wavFilePath});
+          console.log(`Converted to high-quality WAV: ${wavFilePath}`);
           fs.unlinkSync(pcmFilePath); // Delete the PCM file
         } else {
-          console.error(ffmpeg process failed with code ${code});
+          console.error(`ffmpeg process failed with code ${code}`);
         }
       });
 
@@ -122,7 +122,7 @@ client.on(Events.MessageCreate, async (message) => {
     });
 
     connection.on(VoiceConnectionStatus.Ready, () => {
-      message.reply(Joined voice channel: ${channel.name});
+      message.reply(`Joined voice channel: ${channel.name}`);
       const receiver = connection.receiver;
 
       // Start recording audio for each user in the channel
