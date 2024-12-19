@@ -1,0 +1,239 @@
+:root {
+    --background-color: #ffffff;
+    --text-color: #333333;
+    --header-background: #f8f9fa;
+    --feature-background: #f8f9fa;
+    --card-background: #ffffff;
+    --button-background: #8612e4;
+    --button-color: #ffffff;
+}
+
+.dark-mode {
+    --background-color: #000000;
+    --text-color: #ffffff;
+    --header-background: #0a0a0a;
+    --feature-background: #0a0a0a;
+    --card-background: #1a1a1a;
+    --button-background:    #a644f5;
+    --button-color: #ffffff;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--header-background);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+.logo svg {
+    margin-right: 0.5rem;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+}
+
+nav a {
+    margin-left: 1rem;
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+#themeToggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 1rem;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#themeToggle svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: var(--text-color);
+}
+
+.moon-icon {
+    display: none;
+}
+
+.dark-mode .sun-icon {
+    display: none;
+}
+
+.dark-mode .moon-icon {
+    display: block;
+}
+
+.hero {
+    text-align: center;
+    padding: 4rem 0;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    font-size: 1.25rem;
+    color: var(--text-color);
+    max-width: 700px;
+    margin: 0 auto 2rem;
+}
+
+.button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: var(--button-background);
+    color: var(--button-color);
+    text-decoration: none;
+    border-radius: 0.25rem;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    opacity: 0.9;
+}
+
+.button-outline {
+    background-color: transparent;
+    border: 1px solid var(--button-background);
+    color: var(--button-background);
+}
+
+.button-outline:hover {
+    background-color: var(--button-background);
+    color: var(--button-color);
+}
+
+.features {
+    background-color: var(--feature-background);
+    padding: 4rem 0;
+}
+
+.features h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 3rem;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    background-color: var(--card-background);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card svg {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+    stroke: var(--button-background);
+}
+
+.feature-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.cta {
+    text-align: center;
+    padding: 4rem 0;
+}
+
+.cta h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.cta p {
+    font-size: 1.25rem;
+    color: var(--text-color);
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+footer {
+    background-color: var(--header-background);
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-color);
+    border-top: 1px solid var(--text-color);
+}
+
+footer nav {
+    margin-top: 0.5rem;
+    justify-content: center;
+}
+
+footer nav a {
+    margin: 0 0.5rem;
+}
+
+.github{
+    height: 20px;
+}
+
+.gthb{
+    display: flex;
+}
+
+.team{
+    font-weight: bold;
+    font-size: 20px;
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+    .hero p, .cta p {
+        font-size: 1rem;
+    }
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
