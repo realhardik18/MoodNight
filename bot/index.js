@@ -26,6 +26,11 @@ if (!fs.existsSync("./audio")) {
   fs.mkdirSync("./audio");
 }
 
+function getCurrentTimestamp() {
+  const now = new Date();
+  return now.toISOString().replace(/[:.-]/g, "_");
+}
+
 async function startContinuousRecording(receiver, userId, guildId) {
   let isRecording = true;
 
@@ -42,20 +47,21 @@ async function startContinuousRecording(receiver, userId, guildId) {
       end: { behavior: EndBehaviorType.AfterSilence, duration: 1000 },
     });
 
-    const pcmFilePath = `./audio/${guildId}-${userId}-${Date.now()}.pcm`;
+    const timestamp = getCurrentTimestamp();
+    const pcmFilePath = ./audio/${timestamp}.pcm;
     const wavFilePath = pcmFilePath.replace(".pcm", ".wav");
     const writeStream = fs.createWriteStream(pcmFilePath);
 
-    console.log(`Recording audio to ${pcmFilePath}`);
+    console.log(Recording audio to ${pcmFilePath});
     audioStream.pipe(opusDecoder).pipe(writeStream);
 
-    // Stop recording after 10 seconds
+    // Stop recording after 30 seconds
     setTimeout(() => {
       audioStream.unpipe(opusDecoder);
       opusDecoder.unpipe(writeStream);
       writeStream.end();
 
-      console.log(`Saved PCM file: ${pcmFilePath}`);
+      console.log(Saved PCM file: ${pcmFilePath});
 
       // Convert PCM to WAV using ffmpeg with high-quality settings
       const ffmpeg = spawn("ffmpeg", [
@@ -72,17 +78,16 @@ async function startContinuousRecording(receiver, userId, guildId) {
 
       ffmpeg.on("close", (code) => {
         if (code === 0) {
-          console.log(`Converted to high-quality WAV: ${wavFilePath}`);
+          console.log(Converted to high-quality WAV: ${wavFilePath});
           fs.unlinkSync(pcmFilePath); // Delete the PCM file
-          client.channels.get('1319395723975987260').send('hello!')
         } else {
-          console.error(`ffmpeg process failed with code ${code}`);
+          console.error(ffmpeg process failed with code ${code});
         }
       });
 
       // Start a new recording chunk
       recordChunk();
-    }, 10 * 1000);
+    }, 30 * 1000); // 30 seconds
 
     // Handle stream errors
     audioStream.on("error", (error) => {
@@ -117,7 +122,7 @@ client.on(Events.MessageCreate, async (message) => {
     });
 
     connection.on(VoiceConnectionStatus.Ready, () => {
-      message.reply(`Joined voice channel: ${channel.name}`);
+      message.reply(Joined voice channel: ${channel.name});
       const receiver = connection.receiver;
 
       // Start recording audio for each user in the channel
