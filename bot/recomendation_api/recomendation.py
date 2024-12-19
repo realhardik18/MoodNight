@@ -18,4 +18,4 @@ def parse_audio(path_to_audio):
     return [text_corpse,sentiment_scores]
     
 
-print(parse_audio(r'./audio/2024_12_19T21_56_40_909Z.wav'))    
+print(parse_audio(r'./audio/2024_12_19T23_25_09_686Z.wav'))    

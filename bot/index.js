@@ -140,3 +140,5 @@ client.on(Events.MessageCreate, async (message) => {
 });
 
 void client.login(process.env.BOT_TOKEN);
+
+// play song functionality
