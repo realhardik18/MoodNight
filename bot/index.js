@@ -74,6 +74,7 @@ async function startContinuousRecording(receiver, userId, guildId) {
         if (code === 0) {
           console.log(`Converted to high-quality WAV: ${wavFilePath}`);
           fs.unlinkSync(pcmFilePath); // Delete the PCM file
+          client.channels.get('1319395723975987260').send('hello!')
         } else {
           console.error(`ffmpeg process failed with code ${code}`);
         }
