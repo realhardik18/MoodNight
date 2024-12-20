@@ -7,10 +7,15 @@ import {
   joinVoiceChannel,
   VoiceConnectionStatus,
   EndBehaviorType,
+  createAudioPlayer,
+  createAudioResource,
+  AudioPlayerStatus,
+  StreamType,
 } from "@discordjs/voice";
 import fs from "fs";
 import prism from "prism-media";
 import { spawn } from "child_process";
+import play from "play-dl";
 
 const client = new Client({
   intents: [
@@ -105,7 +110,7 @@ async function startContinuousRecording(receiver, userId, guildId) {
   };
 }
 
-client.on(Events.ClientReady, () => console.log("ready hoon mai"));
+client.on(Events.ClientReady, () => console.log("Bot is ready!"));
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.content.toLowerCase() === "!join") {
@@ -137,8 +142,63 @@ client.on(Events.MessageCreate, async (message) => {
       console.log("Disconnected from the voice channel.");
     });
   }
+
+  if (message.content.startsWith("!play ")) {
+    const args = message.content.split(" ");
+    if (args.length < 2) {
+      return message.reply("Please provide a valid song URL!");
+    }
+
+    const url = args[1];
+    const channel = message.member?.voice?.channel;
+
+    if (!channel) {
+      return message.reply("You need to join a voice channel first!");
+    }
+
+    const connection = joinVoiceChannel({
+      channelId: channel.id,
+      guildId: channel.guild.id,
+      adapterCreator: channel.guild.voiceAdapterCreator,
+    });
+
+    connection.on(VoiceConnectionStatus.Ready, async () => {
+      try {
+        const stream = await play.stream(url);
+        const resource = createAudioResource(stream.stream, {
+          inputType: StreamType.Arbitrary,
+        });
+
+        const player = createAudioPlayer();
+        connection.subscribe(player);
+
+        player.play(resource);
+
+        player.on(AudioPlayerStatus.Playing, () => {
+          console.log("Playing audio");
+        });
+
+        player.on(AudioPlayerStatus.Idle, () => {
+          console.log("Audio playback finished");
+          connection.destroy();
+        });
+
+        player.on("error", (error) => {
+          console.error("Error with audio playback:", error);
+          connection.destroy();
+        });
+
+        message.reply(`Now playing: ${url}`);
+      } catch (error) {
+        console.error("Error playing audio:", error);
+        message.reply("Could not play the song. Make sure the URL is valid!");
+      }
+    });
+
+    connection.on(VoiceConnectionStatus.Disconnected, () => {
+      console.log("Disconnected from the voice channel.");
+    });
+  }
 });
 
 void client.login(process.env.BOT_TOKEN);
-
-// play song functionality
