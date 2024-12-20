@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import together
 import requests
 import json
-import urllib.parse
+import random
 
 load_dotenv()
 together.api_key= os.getenv('TOGETHER_AI')
@@ -61,10 +61,41 @@ def get_youtube_link(search_query):
     except Exception as e:
         return f"Error fetching YouTube link: {str(e)}"
 
-def update_json()
+def update_json(url):
+    # Load the existing data from the JSON file
+    with open(r'recomendation\data.json', 'r', encoding='utf-8') as file:
+        data = json.load(file)
+        
+    data['youtube-url'] = url
+    
+    # Save the updated data back to the JSON file
+    with open(r'recomendation\data.json', 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)  # Pretty-print JSON for readability
 
 # Example usage
 
-print(get_youtube_link(search_query=search_query))
+#print(get_youtube_link(search_query=search_query))
+
+def get_latest_audio():
+    return list(filter(lambda x: x.split('.')[-1]=='wav',os.listdir('audio')))[-1]
+
+hip_hop_artists = [
+    "Tupac Shakur",
+    "The Notorious B.I.G.",
+    "Jay-Z",
+    "Nas",
+    "Kendrick Lamar",
+    "Dr. Dre",
+    "Eminem",
+    "Snoop Dogg",
+    "Kanye West",
+    "Lil Wayne"
+]
+
+while True:
+    audio_file='recording/'+get_latest_audio()
+    data=parse_audio(audio_file)
+    update_json(get_youtube_link(get_song(data,random.choice(hip_hop_artists))))
+
 
 
