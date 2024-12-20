@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 import together
 import requests
-from bs4 import BeautifulSoup
+import json
 import urllib.parse
 
 load_dotenv()
@@ -31,36 +31,40 @@ def get_song(mood,artist):
     return response.choices[0].text
 
 
-def get_youtube_url(search_query):
-    # Format the search query to be used in the URL
-    search_query = urllib.parse.quote_plus(search_query)
+def get_youtube_link(search_query):
+    search_query = search_query.replace(' ', '+')  # Replace spaces with '+'
     
-    # Construct the YouTube search URL
-    url = f"https://www.youtube.com/results?search_query={search_query}"
+    params = {
+        "api_key": os.getenv('SERP_API'),
+        "engine": "google",
+        "q": f"{search_query}+site:youtube.com",
+        "location": "India",
+    }
     
+    # Construct the API URL
+    URL = (
+        f"https://serpapi.com/search.json?engine=google"
+        f"&q={params['q']}&location={params['location']}"
+        f"&google_domain=google.com&gl=us&hl=en&api_key={params['api_key']}"
+    )
+    
+    # Fetch and parse the response
+    response = requests.get(URL).json()
+    
+    # Return the first YouTube link
     try:
-        # Send a GET request to YouTube search page
-        response = requests.get(url)
-        response.raise_for_status()  # Raise an error for bad status codes
-        
-        # Parse the page content
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Find the first video link in the search results
-        video = soup.find('a', {'class': 'yt-simple-endpoint style-scope ytd-video-renderer'})
-        
-        # If a video is found, return the full YouTube URL
-        if video:
-            video_url = f"https://www.youtube.com{video['href']}"
-            return video_url
-        else:
-            return "No videos found"
-    
-    except requests.exceptions.RequestException as e:
-        return f"An error occurred: {str(e)}"
+        for result in response.get('organic_results', []):
+            link = result.get('link')
+            if "youtube.com" in link:
+                return link
+        return "No YouTube link found."
+    except Exception as e:
+        return f"Error fetching YouTube link: {str(e)}"
+
+def update_json()
 
 # Example usage
-search_query = "Ed Sheeran - Happier"
-print(get_youtube_url(search_query))
+
+print(get_youtube_link(search_query=search_query))
 
 
